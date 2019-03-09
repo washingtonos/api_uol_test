@@ -1,4 +1,4 @@
-package br.com.washington.uol.uol;
+package br.com.washington.uol;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
