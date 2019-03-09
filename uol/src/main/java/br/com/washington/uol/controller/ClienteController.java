@@ -1,5 +1,10 @@
 package br.com.washington.uol.controller;
 
+import java.net.MalformedURLException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.bind.JAXBException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,19 +23,37 @@ import br.com.washington.uol.service.ClienteService;
 public class ClienteController {
 
 	private final ClienteService clienteService;
+	private final RequestController controller;
 
-	public ClienteController(ClienteService clienteService) {
+	private HttpServletRequest request;
+
+	public ClienteController(ClienteService clienteService, HttpServletRequest request, RequestController controller) {
 		this.clienteService = clienteService;
+		this.request = request;
+		this.controller = controller;
+
 	}
 
 	@PostMapping("/cliente")
 	public ResponseEntity<Cliente> save(@RequestBody Cliente clienteIn) {
+		String ipAddress = request.getHeader("X-FORWARDED-FOR");
+		if (ipAddress == null) {
+			ipAddress = request.getRemoteHost();
+		}
+		System.out.println(ipAddress);
+		
 		Cliente clienteOut = clienteService.save(clienteIn);
 		return new ResponseEntity<>(clienteOut, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/clientes")
-	public Iterable<Cliente> retriveAllClientes() {
+	public Iterable<Cliente> retriveAllClientes() throws MalformedURLException, JAXBException {
+		String ipAddress = request.getHeader("X-FORWARDED-FOR");
+		if (ipAddress == null) {
+			ipAddress = request.getRemoteHost();
+		}
+		System.out.println(ipAddress);
+		executeController();
 		return clienteService.findAll();
 	}
 
@@ -42,5 +65,11 @@ public class ClienteController {
 	@DeleteMapping("/cliente")
 	public Cliente delete(@RequestBody Cliente clienteIn) {
 		return clienteService.delete(clienteIn);
+	}
+
+	public String executeController() throws MalformedURLException, JAXBException{
+		String retorno = (String) controller.requestGeographical("172.217.29.4");
+		String[] tokens = retorno.split(",");
+		return null;
 	}
 }
