@@ -1,5 +1,6 @@
 package br.com.washington.uol.controller;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,43 +18,40 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.washington.uol.entity.Cliente;
 import br.com.washington.uol.service.ClienteService;
+import br.com.washington.uol.util.BusinessException;
 
 @RequestMapping("api")
 @RestController
 public class ClienteController {
 
 	private final ClienteService clienteService;
-	private final RequestController controller;
+	private final RequestController requestController;
 
 	private HttpServletRequest request;
 
-	public ClienteController(ClienteService clienteService, HttpServletRequest request, RequestController controller) {
+	public ClienteController(ClienteService clienteService, HttpServletRequest request, RequestController requestController) {
 		this.clienteService = clienteService;
 		this.request = request;
-		this.controller = controller;
+		this.requestController = requestController;
 
 	}
 
 	@PostMapping("/cliente")
-	public ResponseEntity<Cliente> save(@RequestBody Cliente clienteIn) {
-		String ipAddress = request.getHeader("X-FORWARDED-FOR");
-		if (ipAddress == null) {
-			ipAddress = request.getRemoteHost();
-		}
-		System.out.println(ipAddress);
+	public ResponseEntity<Cliente> save(@RequestBody Cliente clienteIn) throws BusinessException, IOException {
+			String ipAddress = request.getHeader("X-FORWARDED-FOR");
+			if (ipAddress == null) {
+				ipAddress = request.getRemoteHost();
+			}
+
+			executeController(clienteIn, ipAddress);
+
+			Cliente clienteOut = clienteService.save(clienteIn);
+			return new ResponseEntity<>(clienteOut, HttpStatus.CREATED);
 		
-		Cliente clienteOut = clienteService.save(clienteIn);
-		return new ResponseEntity<>(clienteOut, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/clientes")
 	public Iterable<Cliente> retriveAllClientes() throws MalformedURLException, JAXBException {
-		String ipAddress = request.getHeader("X-FORWARDED-FOR");
-		if (ipAddress == null) {
-			ipAddress = request.getRemoteHost();
-		}
-		System.out.println(ipAddress);
-		executeController();
 		return clienteService.findAll();
 	}
 
@@ -67,9 +65,9 @@ public class ClienteController {
 		return clienteService.delete(clienteIn);
 	}
 
-	public String executeController() throws MalformedURLException, JAXBException{
-		String retorno = (String) controller.requestGeographical("172.217.29.4");
-		String[] tokens = retorno.split(",");
-		return null;
+	public void executeController(Cliente cliente,String ipOrigem) throws IOException, BusinessException {
+
+		requestController.consumerApiIP(cliente, ipOrigem);
+		
 	}
 }

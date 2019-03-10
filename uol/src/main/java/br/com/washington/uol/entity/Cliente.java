@@ -27,7 +27,7 @@ public class Cliente implements Serializable {
 	private String nome;
 
 	@NotNull
-	private String idade;
+	private int idade;
 
 	@NotNull
 	private BigDecimal min_temp;
@@ -51,11 +51,11 @@ public class Cliente implements Serializable {
 		this.nome = nome;
 	}
 
-	public String getIdade() {
+	public int getIdade() {
 		return idade;
 	}
 
-	public void setIdade(String idade) {
+	public void setIdade(int idade) {
 		this.idade = idade;
 	}
 

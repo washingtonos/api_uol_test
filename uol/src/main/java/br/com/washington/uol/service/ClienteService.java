@@ -30,7 +30,7 @@ public class ClienteService {
 
 	public Cliente update(Cliente cliente) {
 		Optional<Cliente> clienteModify = clienteRepository.findById(cliente.getId());
-		if(null != cliente.getNome() && null != cliente.getIdade()) {
+		if(null != cliente.getNome() && 0 != cliente.getIdade()) {
 			clienteModify.get().setNome(cliente.getNome());
 			clienteModify.get().setIdade(cliente.getIdade());
 		}
