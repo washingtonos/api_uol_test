@@ -33,6 +33,8 @@ public class RequestController {
 					.path("json/" + ipOrigem).build();
 
 			ResponseEntity<Geographical> entity = restTemplate.getForEntity(uri.toString(), Geographical.class);
+			
+			System.out.println("latitude & longitude ============> " + entity.getBody().getData().getLatitude() + entity.getBody().getData());
 
 			consumerApiWoeid(cliente, entity.getBody().getData().getLatitude(),
 					entity.getBody().getData().getLongitude());

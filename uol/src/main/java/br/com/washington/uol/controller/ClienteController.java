@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,8 @@ public class ClienteController {
 
 	private HttpServletRequest request;
 
-	public ClienteController(ClienteService clienteService, HttpServletRequest request, RequestController requestController) {
+	public ClienteController(ClienteService clienteService, HttpServletRequest request,
+			RequestController requestController) {
 		this.clienteService = clienteService;
 		this.request = request;
 		this.requestController = requestController;
@@ -38,16 +40,13 @@ public class ClienteController {
 
 	@PostMapping("/cliente")
 	public ResponseEntity<Cliente> save(@RequestBody Cliente clienteIn) throws BusinessException, IOException {
-			String ipAddress = request.getHeader("X-FORWARDED-FOR");
-			if (ipAddress == null) {
-				ipAddress = request.getRemoteHost();
-			}
+		String ipAddress = getIpAddress();
+		System.out.println("IP ============> " + ipAddress);
+		executeController(clienteIn, ipAddress);
 
-			executeController(clienteIn, ipAddress);
+		Cliente clienteOut = clienteService.save(clienteIn);
+		return new ResponseEntity<>(clienteOut, HttpStatus.CREATED);
 
-			Cliente clienteOut = clienteService.save(clienteIn);
-			return new ResponseEntity<>(clienteOut, HttpStatus.CREATED);
-		
 	}
 
 	@GetMapping("/clientes")
@@ -65,9 +64,22 @@ public class ClienteController {
 		return clienteService.delete(clienteIn);
 	}
 
-	public void executeController(Cliente cliente,String ipOrigem) throws IOException, BusinessException {
+	@PutMapping("/cliente")
+	public Cliente updateCliente(@RequestBody Cliente cliente) {
+		return clienteService.save(cliente);
+	}
+
+	public void executeController(Cliente cliente, String ipOrigem) throws IOException, BusinessException {
 
 		requestController.consumerApiIP(cliente, ipOrigem);
-		
+	}
+
+	public String getIpAddress() {
+		String ipAddress = request.getHeader("X-FORWARDED-FOR");
+		if (ipAddress == null) {
+			ipAddress = request.getRemoteHost();
+		}
+
+		return ipAddress;
 	}
 }
